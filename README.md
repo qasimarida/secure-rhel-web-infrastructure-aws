@@ -1,574 +1,281 @@
-\# Secure RHEL Web Infrastructure on AWS
+# Secure RHEL Web Infrastructure on AWS
 
+Secure AWS-hosted Linux infrastructure project built using Red Hat Enterprise Linux, Podman containers, SELinux enforcing mode, firewalld, Application Load Balancer, CloudWatch monitoring, and systemd-managed services.
 
+---
 
-\## Project Overview
+## Architecture Diagram
 
+![Architecture Diagram](diagrams/architecture-diagram.png)
 
+---
+
+## Project Features
+
+* Custom AWS VPC architecture
+* Public and private subnets
+* Application Load Balancer with healthy target group monitoring
+* RHEL 9 EC2 deployment
+* SSH hardening with key-based authentication
+* SELinux enforcing mode
+* firewalld configuration
+* Podman containerized Nginx web service
+* systemd persistent service management
+* CloudWatch monitoring and CPU alarms
+* Bash health-check automation script
+
+---
+
+## Project Overview
 
 This project demonstrates the deployment of a secure Linux web infrastructure on AWS using Red Hat Enterprise Linux, Podman containers, SELinux, firewalld, systemd, CloudWatch monitoring, and Application Load Balancer architecture.
 
-
-
 The goal of this project is to combine practical Linux administration and AWS cloud infrastructure skills into one realistic production-style environment.
-
-
 
 This project was built to strengthen hands-on experience in:
 
+* Linux administration
+* AWS infrastructure
+* Networking
+* Security hardening
+* Containers
+* Monitoring
+* Automation
+* Troubleshooting
 
+---
 
-\* Linux administration
+## Technologies Used
 
-\* AWS infrastructure
+### AWS
 
-\* Networking
+* Amazon EC2
+* Amazon VPC
+* Public and Private Subnets
+* Internet Gateway
+* Route Tables
+* Security Groups
+* Application Load Balancer
+* Target Groups
+* CloudWatch
+* SNS Alerts
+* AMI-based EC2 migration
 
-\* Security hardening
+### Linux / RHEL
 
-\* Containers
+* Red Hat Enterprise Linux 9
+* SSH hardening
+* SELinux
+* firewalld
+* systemd
+* Bash scripting
+* Networking troubleshooting
+* Linux permissions
 
-\* Monitoring
+### Containers
 
-\* Automation
+* Podman
+* Nginx container
+* Container volume mounts
+* Container persistence using systemd
 
-\* Troubleshooting
+---
 
+## AWS Infrastructure Design
 
-
-\---
-
-
-
-\# Architecture
-
-
+### VPC
 
 ```text
-
-Internet User
-
-&#x20;     |
-
-&#x20;     v
-
-Application Load Balancer
-
-&#x20;     |
-
-&#x20;     v
-
-Target Group
-
-&#x20;     |
-
-&#x20;     v
-
-RHEL EC2 Instance
-
-&#x20;     |
-
-&#x20;     +---------------------------+
-
-&#x20;     |                           |
-
-&#x20;     v                           v
-
-firewalld                  SELinux Enforcing
-
-&#x20;     |
-
-&#x20;     v
-
-Podman Container
-
-&#x20;     |
-
-&#x20;     v
-
-Nginx Web Service
-
-&#x20;     |
-
-&#x20;     v
-
-Custom HTML Web Page
-
-&#x20;     |
-
-&#x20;     v
-
-systemd Persistent Service
-
-```
-
-
-
-\---
-
-
-
-\# Technologies Used
-
-
-
-\## AWS
-
-
-
-\* Amazon EC2
-
-\* Amazon VPC
-
-\* Public and Private Subnets
-
-\* Internet Gateway
-
-\* Route Tables
-
-\* Security Groups
-
-\* Application Load Balancer
-
-\* Target Groups
-
-\* CloudWatch
-
-\* SNS Alerts
-
-\* AMI-based EC2 migration
-
-
-
-\## Linux / RHEL
-
-
-
-\* Red Hat Enterprise Linux 9
-
-\* SSH hardening
-
-\* SELinux
-
-\* firewalld
-
-\* systemd
-
-\* Bash scripting
-
-\* Networking troubleshooting
-
-\* Linux permissions
-
-
-
-\## Containers
-
-
-
-\* Podman
-
-\* Nginx container
-
-\* Container volume mounts
-
-\* Container persistence using systemd
-
-
-
-\---
-
-
-
-\# AWS Infrastructure Design
-
-
-
-\## VPC
-
-
-
-```text
-
 10.0.0.0/16
-
 ```
 
-
-
-\## Public Subnets
-
-
+### Public Subnets
 
 ```text
-
 10.0.1.0/24
-
 10.0.3.0/24
-
 ```
 
-
-
-\## Private Subnet
-
-
+### Private Subnet
 
 ```text
-
 10.0.2.0/24
-
 ```
 
+---
 
+## Security Model
 
-\## Security Model
+* SSH restricted to administrator IP
+* HTTP exposed through ALB
+* firewalld enabled
+* SELinux enforcing
+* Root SSH login disabled
+* Password authentication disabled
 
+---
 
+## Linux Security Hardening
 
-\* SSH restricted to administrator IP
-
-\* HTTP exposed through ALB
-
-\* firewalld enabled
-
-\* SELinux enforcing
-
-\* Root SSH login disabled
-
-\* Password authentication disabled
-
-
-
-\---
-
-
-
-\# Linux Security Hardening
-
-
-
-\## SSH Hardening
-
-
+### SSH Hardening
 
 Configured:
 
-
-
 ```text
-
 PermitRootLogin no
-
 PasswordAuthentication no
-
 ```
-
-
 
 Administrative access is performed using SSH keys and sudo privilege escalation.
 
+---
 
-
-\---
-
-
-
-\## SELinux
-
-
+### SELinux
 
 SELinux remains in:
 
-
-
 ```text
-
 Enforcing
-
 ```
-
-
 
 Container volume mounts use proper SELinux labeling:
 
-
-
 ```bash
-
-\-v /srv/project-web:/usr/share/nginx/html:Z
-
+-v /srv/project-web:/usr/share/nginx/html:Z
 ```
 
+---
 
-
-\---
-
-
-
-\## firewalld
-
-
+### firewalld
 
 Configured to allow only required services:
 
+* SSH
+* HTTP
 
+---
 
-\* SSH
-
-\* HTTP
-
-
-
-\---
-
-
-
-\# Podman Container Deployment
-
-
+## Podman Container Deployment
 
 The web service runs inside a Podman-managed Nginx container.
 
-
-
-\## Example Deployment
-
-
+### Example Deployment
 
 ```bash
-
-sudo podman run -d \\
-
-&#x20; --name project-web \\
-
-&#x20; -p 80:80 \\
-
-&#x20; -v /srv/project-web:/usr/share/nginx/html:Z \\
-
-&#x20; docker.io/library/nginx
-
+sudo podman run -d \
+  --name project-web \
+  -p 80:80 \
+  -v /srv/project-web:/usr/share/nginx/html:Z \
+  docker.io/library/nginx
 ```
 
+---
 
-
-\---
-
-
-
-\# systemd Integration
-
-
+## systemd Integration
 
 The containerized service is managed through systemd to ensure persistence after reboot.
 
-
-
-\## Example Commands
-
-
+### Example Commands
 
 ```bash
-
 sudo podman generate systemd --name project-web --files --new
 
 sudo systemctl enable --now container-project-web.service
-
 ```
 
+---
 
+## Monitoring and Alerting
 
-\---
-
-
-
-\# Monitoring and Alerting
-
-
-
-\## CloudWatch Metrics
-
-
+### CloudWatch Metrics
 
 Monitored:
 
+* CPU utilization
+* Network traffic
+* Disk operations
 
-
-\* CPU utilization
-
-\* Network traffic
-
-\* Disk operations
-
-
-
-\## CloudWatch Alarm
-
-
+### CloudWatch Alarm
 
 Configured CPU utilization alarm:
 
-
-
 ```text
-
 rhel-web-high-cpu
-
 ```
 
-
-
-\## SNS Notifications
-
-
+### SNS Notifications
 
 CloudWatch alarms integrated with SNS email notifications.
 
+---
 
-
-\---
-
-
-
-\# Bash Health-Check Script
-
-
+## Bash Health-Check Script
 
 A custom Bash script was created to verify:
 
+* Podman container status
+* HTTP response
+* Port listening state
+* Disk usage
 
-
-\* Podman container status
-
-\* HTTP response
-
-\* Port listening state
-
-\* Disk usage
-
-
-
-\## Example
-
-
+### Example
 
 ```bash
-
-\~/scripts/health-check.sh
-
+~/scripts/health-check.sh
 ```
 
+---
 
-
-\---
-
-
-
-\# Operational Skills Demonstrated
-
-
+## Operational Skills Demonstrated
 
 This project demonstrates practical experience with:
 
+* AWS networking
+* Linux administration
+* SSH security
+* SELinux troubleshooting
+* firewalld configuration
+* Podman container management
+* systemd service persistence
+* CloudWatch monitoring
+* Infrastructure troubleshooting
+* AMI-based migration workflows
 
+---
 
-\* AWS networking
+## Lessons Learned
 
-\* Linux administration
+### Key Lessons
 
-\* SSH security
+* Application Load Balancers require multiple Availability Zones.
+* SELinux labeling is important for container volume access.
+* systemd improves container persistence and operational reliability.
+* Security Groups and firewalld provide layered security.
+* Infrastructure should be monitored, not only deployed.
+* SSH hardening is critical for secure Linux administration.
 
-\* SELinux troubleshooting
+---
 
-\* firewalld configuration
-
-\* Podman container management
-
-\* systemd service persistence
-
-\* CloudWatch monitoring
-
-\* Infrastructure troubleshooting
-
-\* AMI-based migration workflows
-
-
-
-\---
-
-
-
-\# Lessons Learned
-
-
-
-\## Key Lessons
-
-
-
-\* Application Load Balancers require multiple Availability Zones.
-
-\* SELinux labeling is important for container volume access.
-
-\* systemd improves container persistence and operational reliability.
-
-\* Security Groups and firewalld provide layered security.
-
-\* Infrastructure should be monitored, not only deployed.
-
-\* SSH hardening is critical for secure Linux administration.
-
-
-
-\---
-
-
-
-\# Future Improvements
-
-
+## Future Improvements
 
 Potential future improvements:
 
+* HTTPS with AWS Certificate Manager
+* Route 53 domain integration
+* CloudWatch Agent for memory monitoring
+* Auto Scaling Group integration
+* CI/CD pipeline deployment
 
+---
 
-\* HTTPS with AWS Certificate Manager
-
-\* Route 53 domain integration
-
-\* CloudWatch Agent for memory monitoring
-
-\* Auto Scaling Group integration
-
-\* CI/CD pipeline deployment
-
-
-
-\---
-
-
-
-\# Project Goals
-
-
+## Project Goals
 
 The primary goal of this project was to combine Linux administration and AWS infrastructure concepts into one realistic hands-on deployment environment suitable for portfolio, interview, and resume use.
 
+---
 
-
-\---
-
-
-
-\# Author
-
-
+## Author
 
 Qasim Arida
 
-
-
 Linux | AWS | RHCSA | Cloud Infrastructure | System Administration
-
-
-

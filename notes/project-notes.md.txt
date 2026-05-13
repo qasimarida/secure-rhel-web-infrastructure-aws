@@ -1,0 +1,35 @@
+# Project Notes
+
+## Project Goal
+
+Build a secure Linux web infrastructure project on AWS using RHEL 9, Podman, SELinux, firewalld, systemd, CloudWatch, and Application Load Balancer architecture.
+
+---
+
+## Key Technologies
+
+- AWS EC2
+- AWS VPC
+- Application Load Balancer
+- CloudWatch
+- RHEL 9
+- Podman
+- Nginx
+- SELinux
+- firewalld
+- systemd
+- Bash scripting
+
+---
+
+## Important Lessons Learned
+
+- Application Load Balancers require at least two Availability Zones.
+- SELinux volume labeling is important for container access.
+- systemd improves service persistence after reboot.
+- Security Groups and firewalld provide layered security.
+- CloudWatch alarms improve infrastructure monitoring.
+- SSH hardening is important for Linux security.
+
+---
+
